@@ -1,0 +1,5 @@
+.idea
+/.task
+node_modules
+.DS_Store
+AMISC
