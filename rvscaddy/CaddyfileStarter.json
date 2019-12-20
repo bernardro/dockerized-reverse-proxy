@@ -1,0 +1,14 @@
+{
+    "admin": {
+        "disabled": false,
+        "listen": ":2019",
+        "enforce_origin": false
+    },
+    "apps": {
+        "http": {
+            "servers": {
+
+            }
+        }
+    }
+}

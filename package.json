@@ -1,0 +1,41 @@
+{
+    "name": "dockerized-reverse-proxy",
+    "version": "0.0.1",
+    "description": "Dockerized reverse proxy that dynamically configures caddy v2",
+    "keywords": [
+        "caddy",
+        "docker engine",
+        "docker sdk",
+        "dockerode",
+        "docker"
+    ],
+    "dependencies": {
+        "dockerode": "^3.0.2",
+        "request": "^2.88.0"
+    },
+    "devDependencies": {
+        "@apify/eslint-config": "0.0.3",
+        "chai": "^4.2.0",
+        "eslint": "^6.5.1",
+        "mocha": "^6.2.2",
+        "sinon": "^7.5.0"
+    },
+    "scripts": {
+        "start": "node src/main.js",
+        "test": "mocha test/utility_spec.js",
+        "caddybug": "DOCKER_SOCKET=/var/run/docker.sock CADDY_TRANSFER_PORT=4333 NETWORK_NAME=prxynet VERBOSE_DEBUG=true CADDY_ADMIN_PORT=2019 node rvscaddy/genconfig/src/main.js"
+    },
+    "author": "bernardo@sonkomail.com",
+    "contributors": [
+        "Bernard Okoth <bernardo@sonkomail.com>"
+    ],
+    "license": "Apache-2.0",
+    "homepage": "https://github.com/bernardro/dockerized-reverse-proxy",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/bernardro/dockerized-reverse-proxy"
+    },
+    "bugs": {
+        "url": "https://github.com/bernardro/dockerized-reverse-proxy/issues"
+    }
+}

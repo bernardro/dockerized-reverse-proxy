@@ -1,0 +1,13 @@
+{
+    "name": "docker-listener",
+    "version": "0.0.1",
+    "description": "Listens to docker events and generates caddy v2 configs",
+    "dependencies": {
+        "dockerode": "^3.0.2",
+        "request": "^2.88.0"
+    },
+    "scripts": {
+        "start": "node main.js"
+    },
+    "license": "Apache-2.0"
+}
