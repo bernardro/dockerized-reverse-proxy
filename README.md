@@ -32,7 +32,7 @@ Obviously this project is currently only for MVP, hobby type projects and is not
 - Explore running this infrastructure on Kubernetes 
 - Run Docker in rootless mode ( introduced in Docker Engine 19.03)
 
-## Notes
+## Developer Notes
 - Requires hosted services to be packaged with docker compose and properly **labelled**; something similar to this:
 
 ```yaml
@@ -49,3 +49,16 @@ Obviously this project is currently only for MVP, hobby type projects and is not
       - "virtual.autohttps=false" # enable caddy automatic https
     ...
 ```
+
+- If a docker service runs out of memory, it is removed from the caddy config even before it dies because it is
+ likely to become vulnerable to hacker attacks when in an out-of-memory state. We ensure this by adding 
+ the 'oom' docker event in the appropriate place in the constants file (reproduced below)  
+
+```  
+...
+exports.CONTAINER = {
+    GOING_DOWN: ['pause', 'oom', 'die'],
+    GOING_UP: ['start', 'unpause'],
+};
+...
+```  
