@@ -87,13 +87,16 @@ exports.skipContainer = (containerId, evtInfo) => {
     return false;
 };
 
-exports.getRvsCfg = (labelsRay, caddyPort) => {
-    const doAutoHttps = dockerUtils.getLabelBoolVal(labelsRay, 'virtual.autohttps');
-    // const doWsocketPassThru = dockerUtils.getLabelBoolVal(labelsRay, 'virtual.websockets');
+exports.getRvsCfg = (lbls, caddyPort) => {
+    const doAutoHttps = dockerUtils.getLabelBoolVal(lbls, 'virtual.autohttps');
+    // const doWsocketPassThru = dockerUtils.getLabelBoolVal(lbls, 'virtual.websockets');
 
-    const svrName = labelsRay['virtual.server'];
-    const svrPort = labelsRay['virtual.port'];
-    const handler = exports.getRvsPrxyHandler(svrName, svrPort);
+    const svrName = lbls['virtual.server'];
+    const svrPort = lbls['virtual.port'];
+    const handler = {
+        handler: 'reverse_proxy',
+        upstreams: [{ dial: `${svrName}:${svrPort}` }],
+    };
 
     const svrCfg = {};
     svrCfg[svrName] = {
@@ -106,7 +109,19 @@ exports.getRvsCfg = (labelsRay, caddyPort) => {
 };
 
 exports.getStaticCfg = (caddyPort, CONSTS) => {
-    const staticHandler = exports.getStaticSvrHandler(CONSTS.PATHS.STATIC_WWW);
+    const staticHandler = {
+        handler: 'static_response',
+        body: '<!DOCTYPE html>'
+            + '<html lang="en">'
+            + '<head>'
+            + '    <meta charset="UTF-8">'
+            + '    <title>Caddy default static server</title>'
+            + '</head>'
+            + '<body>'
+            + '    Hello from Caddy v2 default static server'
+            + '</body>'
+            + '</html>',
+    };
 
     const staticCfg = {};
     staticCfg[CONSTS.SVR_NAMES.DEFAULT_STATIC] = {
@@ -116,20 +131,6 @@ exports.getStaticCfg = (caddyPort, CONSTS) => {
     };
 
     return staticCfg;
-};
-
-exports.getStaticSvrHandler = (staticWwwPath) => {
-    return {
-        handler: 'file_server',
-        root: staticWwwPath,
-    };
-};
-
-exports.getRvsPrxyHandler = (svrName, svrPort) => {
-    return {
-        handler: 'reverse_proxy',
-        upstreams: [{ dial: `${svrName}:${svrPort}` }],
-    };
 };
 
 exports.isMinimumLabelsFound = (labelsRay, REQUIRED) => {
