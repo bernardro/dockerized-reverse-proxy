@@ -16,7 +16,7 @@ exports.SVR_NAMES = {
     DEFAULT_STATIC: 'default',
 };
 
-exports.CONTAINER_GOING = {
-    DOWN: ['pause', 'oom', 'die'],
-    UP: ['start', 'unpause'],
+exports.CONTAINER = {
+    GOING_DOWN: ['pause', 'oom', 'die'],
+    GOING_UP: ['start', 'unpause'],
 };

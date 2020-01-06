@@ -45,7 +45,7 @@ const evtHandler = (err, stream) => {
         }
 
         const actorId = evtJson.Actor.ID;
-        const isContainerDying = CONSTS.CONTAINER_GOING.DOWN.indexOf(objEvt) >= 0;
+        const isContainerDying = CONSTS.CONTAINER.GOING_DOWN.indexOf(objEvt) >= 0;
 
         const evtInfo = { actorId, isContainerDying };
         updateConfigsFromContainers(evtInfo);
@@ -56,6 +56,6 @@ const evtHandler = (err, stream) => {
 docker.getEvents({
     filters: {
         type: ['container'],
-        event: ['update', ...CONSTS.CONTAINER_GOING.UP, ...CONSTS.CONTAINER_GOING.DOWN],
+        event: ['update', ...CONSTS.CONTAINER.GOING_UP, ...CONSTS.CONTAINER.GOING_DOWN],
     },
 }, evtHandler);
