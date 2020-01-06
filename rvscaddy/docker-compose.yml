@@ -3,7 +3,7 @@ version: '3.7'
 services:
   caddysvr:
     container_name: cdysvr
-    image: rvsprxy:caddysvr # behavior of 'image' changes if 'build' also present
+    image: rvsprxy:caddysvr # 'image' becomes 'container label' if 'build' also present
     build:
       context: caddysvr
       target: alpine
@@ -26,7 +26,7 @@ services:
   ###############################################################################
   genconfig:
     container_name: gncfg
-    image: rvsprxy:genconfig # behavior of 'image' changes if 'build' also present
+    image: rvsprxy:genconfig # 'image' becomes 'container label' if 'build' also present
     build:
       context: genconfig
     restart: on-failure:3

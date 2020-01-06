@@ -3,7 +3,7 @@ version: '3.7'
 services:
   nodebasic:
     container_name: ndbsc
-    image: rvsprxy:nodebasic # behavior of 'image' changes if 'build' also present
+    image: rvsprxy:nodebasic # 'image' becomes 'container label' if 'build' also present
     build:
       context: .
     restart: on-failure:3
