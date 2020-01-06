@@ -16,7 +16,6 @@ services:
       - ./caddysvr/certs/ocsp:/etc/caddy/ocsp  # to save certificates
 
       - ./CaddyfileStarter.json:/etc/caddy/Caddyfile
-      - ./caddysvr/www:/var/www
     networks:
       - lixirdev_prxynet
     ports:

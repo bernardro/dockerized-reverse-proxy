@@ -12,10 +12,6 @@ exports.LABELS = {
     OPTIONAL: ['virtual.tls-email', 'virtual.websockets'],
 };
 
-exports.PATHS = {
-    STATIC_WWW: '/var/www',
-};
-
 exports.SVR_NAMES = {
     DEFAULT_STATIC: 'default',
 };
