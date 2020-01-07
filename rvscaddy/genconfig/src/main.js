@@ -5,7 +5,7 @@ const caddyUtils = require('./utils_caddy');
 const dockerUtils = require('./utils_docker');
 const CONSTS = require('./consts');
 
-const { DOCKER_SOCKET, NETWORK_NAME, CADDY_TRANSFER_PORT: transPORT, VERBOSE_DEBUG } = process.env;
+const { HOST_IP, DOCKER_SOCKET, NETWORK_NAME, CADDY_TRANSFER_PORT: transPORT, VERBOSE_DEBUG } = process.env;
 const showDbgLogs = VERBOSE_DEBUG === 'true';
 
 const stats = fs.statSync(DOCKER_SOCKET);
@@ -22,7 +22,17 @@ const updateConfigsFromContainers = (evtInfo) => {
         }
 
         const prxyCntnrs = cntnrs.filter(cont => dockerUtils.isAttachedToPrxyNet(cont, NETWORK_NAME));
-        const caddyServers = caddyUtils.getNewCfgSvrsScope(prxyCntnrs, transPORT, CONSTS, evtInfo);
+
+        // always add a default static server to respond when server accessed by IP
+        const staticRoute = caddyUtils.getStaticRoute(HOST_IP);
+        const proxyRoutes = caddyUtils.getPrxySvrRoutes(prxyCntnrs, CONSTS.LABELS.REQUIRED, evtInfo);
+
+        const caddyServers = {};
+        caddyServers[CONSTS.SVR_NAMES.DEFAULT_STATIC] = {
+            listen: [`:${transPORT}`],
+            routes: [...staticRoute, ...proxyRoutes],
+            automatic_https: { disable: true },
+        };
 
         caddyUtils.updateCaddyCfg(caddyServers, showDbgLogs, CONSTS.CADDY_ADMIN);
     });

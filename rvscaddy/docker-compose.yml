@@ -10,7 +10,9 @@ services:
       #      target: scratch
       args:
         - CADDY_SOURCE_VERSION
-    restart: on-failure:3
+    restart: on-failure:0      # change this to something like 3 in production
+    environment:
+      - HOST_IP
     volumes:
       - ./caddysvr/certs/acme:/etc/caddy/acme  # to save acme
       - ./caddysvr/certs/ocsp:/etc/caddy/ocsp  # to save certificates
@@ -29,7 +31,7 @@ services:
     image: rvsprxy:genconfig # 'image' becomes 'container label' if 'build' also present
     build:
       context: genconfig
-    restart: on-failure:3
+    restart: on-failure:0    # change this to something like 3 in production
     environment:
       - CADDY_TRANSFER_PORT
       - HOST_IP
@@ -39,7 +41,7 @@ services:
       - VERBOSE_DEBUG
       - CADDY_ADMIN_PORT
     volumes:
-      - ${DOCKER_SOCKET}:${DOCKER_SOCKET}:ro     # needs socket to read events
+      - ${DOCKER_SOCKET}:${DOCKER_SOCKET}:ro  # using socket option to read docker events
     networks:
       - lixirdev_prxynet
     command: ["tail", "-f"]

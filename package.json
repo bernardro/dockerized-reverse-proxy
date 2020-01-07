@@ -23,7 +23,7 @@
     "scripts": {
         "start": "node src/main.js",
         "test": "mocha test/utility_spec.js",
-        "caddybug": "DOCKER_SOCKET=/var/run/docker.sock CADDY_TRANSFER_PORT=4333 NETWORK_NAME=prxynet VERBOSE_DEBUG=true CADDY_ADMIN_PORT=2019 node rvscaddy/genconfig/src/main.js"
+        "caddybug": "DOCKER_SOCKET=/var/run/docker.sock CADDY_TRANSFER_PORT=4333 NETWORK_NAME=prxynet VERBOSE_DEBUG=true CADDY_ADMIN_PORT=2019 HOST_IP=192.168.168.181 node rvscaddy/genconfig/src/main.js"
     },
     "author": "bernardo@sonkomail.com",
     "contributors": [

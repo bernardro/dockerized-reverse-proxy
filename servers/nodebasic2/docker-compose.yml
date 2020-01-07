@@ -1,9 +1,9 @@
 version: '3.7'
 
 services:
-  nodebasic:
-    container_name: ndbsc
-    image: rvsprxy:nodebasic # 'image' becomes 'container label' if 'build' also present
+  nodebasic2:
+    container_name: ndbsc2
+    image: rvsprxy:nodebasic2 # 'image' becomes 'container label' if 'build' also present
     build:
       context: .
     restart: on-failure:3
@@ -15,11 +15,11 @@ services:
       - lixirdev_prxynet
     command: ["/src/main.js"]
     labels:
-      - "virtual.server=nodebasic"  # docker host
-      - "virtual.host=karamba.com karamba.com"  # your domains separated with a space
-      - "virtual.alias=www.karamba.com"  # alias for your domain (optional) separated with a space
+      - "virtual.server=nodebasic2"  # docker host
+      - "virtual.host=rvsdocker2.com"  # your domain
+      - "virtual.alias=www.rvsdocker2.com"  # aliases for your domain (optional) separated with a space
       - "virtual.port=${NODE_SVR_PORT}"  # exposed port of this container
-      - "virtual.tls-email=your@tlsworthyemail.com"  # ssl is now on
+      - "virtual.tls-email=tls@rvsdocker2.com"  # ssl is now on
       - "virtual.websockets" # enable websocket passthrough
       - "virtual.autohttps=false" # enable automatic https
 

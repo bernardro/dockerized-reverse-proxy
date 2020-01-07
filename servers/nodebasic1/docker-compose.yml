@@ -1,0 +1,30 @@
+version: '3.7'
+
+services:
+  nodebasic1:
+    container_name: ndbsc1
+    image: rvsprxy:nodebasic1 # 'image' becomes 'container label' if 'build' also present
+    build:
+      context: .
+    restart: on-failure:3
+    environment:
+      - NODE_SVR_PORT
+    volumes:
+      - ./src:/src
+    networks:
+      - lixirdev_prxynet
+    command: ["/src/main.js"]
+    labels:
+      - "virtual.server=nodebasic1"  # docker host
+      - "virtual.host=rvsdocker1.com"  # your domain
+      - "virtual.alias=www.rvsdocker1.com"  # aliases for your domain (optional) separated with a space
+      - "virtual.port=${NODE_SVR_PORT}"  # exposed port of this container
+      - "virtual.tls-email=tls@rvsdocker1.com"  # ssl is now on
+      - "virtual.websockets" # enable websocket passthrough
+      - "virtual.autohttps=false" # enable automatic https
+
+
+networks:
+  lixirdev_prxynet:
+    driver: bridge
+    external: true

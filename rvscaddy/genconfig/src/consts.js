@@ -8,7 +8,7 @@ exports.CADDY_ADMIN = {
 };
 
 exports.LABELS = {
-    REQUIRED: ['virtual.server', 'virtual.port'],
+    REQUIRED: ['virtual.server', 'virtual.port', 'virtual.host'],
     OPTIONAL: ['virtual.tls-email', 'virtual.websockets'],
 };
 

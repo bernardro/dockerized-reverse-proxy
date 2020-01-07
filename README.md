@@ -40,7 +40,7 @@ Obviously this project is currently only for MVP, hobby type projects and is not
     ...
     command: ["/src/main.js"]
     labels:
-      - "virtual.server=nodebasic"  # Docker host
+      - "virtual.server=nodebasic1"  # Docker host
       - "virtual.host=karamba.com"  # your domains separated with a space
       - "virtual.alias=www.karamba.com"  # alias for your domain (optional) separated with a space
       - "virtual.port=${NODE_SVR_PORT}"  # exposed port of this container

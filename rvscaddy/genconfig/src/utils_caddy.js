@@ -2,14 +2,14 @@ const request = require('request');
 const dockerUtils = require('./utils_docker');
 
 
-exports.updateCaddyCfg = (serversCnfg, showDbgLogs, caddyAdmin) => {
+exports.updateCaddyCfg = (serversCnfg, showDbgLogs, CADDY_ADMIN) => {
     const opts = {
-        baseUrl: `http://${caddyAdmin.HOST}:${caddyAdmin.PORT}`,
+        baseUrl: `http://${CADDY_ADMIN.HOST}:${CADDY_ADMIN.PORT}`,
         url: '/config/apps/http/servers',
         body: serversCnfg,
         json: true,
         followRedirect: false,
-        timeout: caddyAdmin.TIMEOUT_MS,
+        timeout: CADDY_ADMIN.TIMEOUT_MS,
     };
 
     request.post(opts, (error, response, body) => {
@@ -25,31 +25,23 @@ exports.updateCaddyCfg = (serversCnfg, showDbgLogs, caddyAdmin) => {
     });
 };
 
-exports.getNewCfgSvrsScope = (containers, transPORT, CONSTS, evtInfo) => {
-    let svrConfigs = {};
+exports.getPrxySvrRoutes = (containers, REQUIRED_LBLS, evtInfo) => {
+    const svrConfigs = [];
 
     for (const container of containers) {
         // check if event is about to bring this container down
-        if (exports.skipContainer(container.Id, evtInfo)) {
+        if (!exports.skipContainer(container.Id, evtInfo)) {
             // if container going down leave it out of the new config
-            break;
+
+            const labels = container.Labels;
+            const reqLabelsFound = exports.isMinimumLabelsFound(labels, REQUIRED_LBLS);
+            if (reqLabelsFound) {
+                const rvsConfig = exports.getRvsCfg(labels);
+
+                // append to new caddy config
+                svrConfigs.push(rvsConfig);
+            }
         }
-
-        const labels = container.Labels;
-        const reqLabelsFound = exports.isMinimumLabelsFound(labels, CONSTS.LABELS.REQUIRED);
-        if (reqLabelsFound) {
-            const rvsConfig = exports.getRvsCfg(labels, transPORT);
-
-            // append to new caddy config
-            svrConfigs = { ...svrConfigs, ...rvsConfig };
-        }
-    }
-
-    // check if any reverse proxy servers were configured
-    if (Object.keys(svrConfigs).length === 0) {
-        // if no reverse proxy servers configured
-        // set up the default static server
-        svrConfigs = exports.getStaticCfg(transPORT, CONSTS);
     }
 
     return svrConfigs;
@@ -64,13 +56,27 @@ exports.logSvrConfig = (svrsJson, showDetail) => {
         if (showDetail) {
             for (const kee of svrKeys) {
                 const svrCfg = svrsJson[kee];
-                console.info(`[${kee}] listening on ${svrCfg.listen[0]} with handler`);
-                console.dir(JSON.stringify(svrCfg.routes[0].handle, '', 2));
-                console.info('\n');
+                console.info(`[${kee}] responding to ${svrCfg.listen[0]} from routes:`);
+
+                if (svrCfg.routes) {
+                    for (let ndx = 0; ndx < svrCfg.routes.length; ndx++) {
+                        const route = svrCfg.routes[ndx];
+
+                        const host = (route.match) ? route.match[0].host[0] : 'ALL';
+                        const hndlr = route.handle[0].routes[0].handle[0].handler;
+
+                        const { upstreams } = route.handle[0].routes[0].handle[0];
+                        const { body } = route.handle[0].routes[0].handle[0];
+
+                        const srvce = (body) ? '' : ` to upstream ${upstreams[0].dial}`;
+
+                        console.info(`#${ndx + 1} - ${host} via ${hndlr}${srvce}`);
+                    }
+                }
             }
         }
     } else {
-        console.info('no servers updated');
+        console.info('>>>>>>>>>>>>>>>>>>> default static responder not up!');
     }
 };
 
@@ -87,28 +93,34 @@ exports.skipContainer = (containerId, evtInfo) => {
     return false;
 };
 
-exports.getRvsCfg = (lbls, caddyPort) => {
-    const doAutoHttps = dockerUtils.getLabelBoolVal(lbls, 'virtual.autohttps');
+exports.getRvsCfg = (lbls) => {
+    // const doAutoHttps = dockerUtils.getLabelBoolVal(lbls, 'virtual.autohttps');
     // const doWsocketPassThru = dockerUtils.getLabelBoolVal(lbls, 'virtual.websockets');
+
+    const domainMatch = {
+        host: [`${lbls['virtual.host']}`],
+    };
 
     const svrName = lbls['virtual.server'];
     const svrPort = lbls['virtual.port'];
-    const handler = {
+    const domainHndlr = {
         handler: 'reverse_proxy',
         upstreams: [{ dial: `${svrName}:${svrPort}` }],
     };
 
-    const svrCfg = {};
-    svrCfg[svrName] = {
-        listen: [`:${caddyPort}`],
-        routes: [{ handle: [handler] }],
-        automatic_https: { disable: !doAutoHttps },
+    const handler = {
+        handler: 'subroute',
+        routes: [{ handle: [domainHndlr] }],
     };
 
-    return svrCfg;
+    return { match: [domainMatch], handle: [handler] };
 };
 
-exports.getStaticCfg = (caddyPort, CONSTS) => {
+exports.getStaticRoute = (HOST_IP) => {
+    const staticMatch = {
+        host: [`${HOST_IP}`],
+    };
+
     const staticHandler = {
         handler: 'static_response',
         body: '<!DOCTYPE html>'
@@ -118,19 +130,17 @@ exports.getStaticCfg = (caddyPort, CONSTS) => {
             + '    <title>Caddy default static server</title>'
             + '</head>'
             + '<body>'
-            + '    Hello from Caddy v2 default static server'
+            + '    Hello from Caddy v2 default static responder'
             + '</body>'
             + '</html>',
     };
 
-    const staticCfg = {};
-    staticCfg[CONSTS.SVR_NAMES.DEFAULT_STATIC] = {
-        listen: [`:${caddyPort}`],
+    const handler = {
+        handler: 'subroute',
         routes: [{ handle: [staticHandler] }],
-        automatic_https: { disable: true },
     };
 
-    return staticCfg;
+    return [{ match: [staticMatch], handle: [handler] }];
 };
 
 exports.isMinimumLabelsFound = (labelsRay, REQUIRED) => {
