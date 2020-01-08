@@ -6,24 +6,24 @@ services:
     image: rvsprxy:caddysvr # 'image' becomes 'container label' if 'build' also present
     build:
       context: caddysvr
-      target: alpine
-      #      target: scratch
+      target: alpine          # good for local testing and debug
+      #      target: scratch  # leanest and most secure option for production
       args:
+        - XDG_DATA_HOME
         - CADDY_SOURCE_VERSION
     restart: on-failure:0      # change this to something like 3 in production
     environment:
       - HOST_IP
+      - XDG_DATA_HOME
     volumes:
-      - ./caddysvr/certs/acme:/etc/caddy/acme  # to save acme
-      - ./caddysvr/certs/ocsp:/etc/caddy/ocsp  # to save certificates
-
-      - ./CaddyfileStarter.json:/etc/caddy/Caddyfile
+      - ./caddysvr/conf:${XDG_DATA_HOME}
+      - ./caddysvr/CaddyfileStarter.json:${XDG_DATA_HOME}/Caddyfile
     networks:
       - lixirdev_prxynet
     ports:
       # "HOST:CONTAINER"
       - "${CADDY_VISIBLE_PORT}:${CADDY_TRANSFER_PORT}"
-    command: ["run", "--config", "/etc/caddy/Caddyfile"]
+    command: ["run", "--config", "${XDG_DATA_HOME}/Caddyfile"]
 
   ###############################################################################
   genconfig:

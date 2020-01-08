@@ -24,9 +24,11 @@ RUN addgroup -S caddy \
 COPY --from=builder /usr/bin/caddy /usr/bin/caddy
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs
 
-#COPY --chown=caddy:caddy startup/caddy_entrypoint.sh /opt/caddy_entrypoint.sh
-#RUN chmod ug+rx /opt/caddy_entrypoint.sh
-#ENTRYPOINT ["/opt/caddy_entrypoint.sh"]
+ARG XDG_DATA_HOME
+
+RUN mkdir -p ${XDG_DATA_HOME}
+RUN chown -R caddy:caddy ${XDG_DATA_HOME}
+RUN chmod -R ug+rx ${XDG_DATA_HOME}
 
 ENTRYPOINT ["caddy"]
 
